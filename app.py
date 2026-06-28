@@ -17,7 +17,6 @@ dept_data = {
 df_dept = pd.DataFrame(dept_data)
 
 # June 1st to June 28th Time Series Data
-# Updated to ensure 2/6/26 reflects 647 calls (exceeding target)
 ts_csv = """Date,Total calls
 01/06/2026,636
 02/06/2026,647
@@ -51,8 +50,15 @@ ts_csv = """Date,Total calls
 df_ts = pd.read_csv(StringIO(ts_csv))
 df_ts['Date'] = pd.to_datetime(df_ts['Date'], format='%d/%m/%Y')
 
+# Extract just the day number for x-axis simplified labels
+df_ts['DayNumber'] = df_ts['Date'].dt.day
+
 # Target baseline parameters
 target_baseline = 640
+
+# Global font configuration to force bold, dark text
+bold_dark_font = dict(family="Arial, sans-serif", size=13, color="#111111")
+bold_dark_title_font = dict(family="Arial, sans-serif", size=15, color="#111111")
 
 # -----------------------------------------------------------------------------
 # 2. HEADER
@@ -73,17 +79,17 @@ with chart_col1:
     
     # Line chart trace for volume tracking
     fig_ts.add_trace(go.Scatter(
-        x=df_ts['Date'], 
+        x=df_ts['DayNumber'], 
         y=df_ts['Total calls'],
         mode='lines+markers',
         name='Daily Total Calls',
         line=dict(color='#0066cc', width=2.5),
-        marker=dict(size=5)
+        marker=dict(size=6)
     ))
     
     # Target baseline reference rule
     fig_ts.add_trace(go.Scatter(
-        x=df_ts['Date'],
+        x=df_ts['DayNumber'],
         y=[target_baseline] * len(df_ts),
         mode='lines',
         name=f'Daily Target Threshold ({target_baseline})',
@@ -92,20 +98,30 @@ with chart_col1:
     
     fig_ts.update_layout(
         xaxis=dict(
-            title="Date (June 2026)",
-            tickformat="%d %b",
+            title=dict(text="<b>Day of Month (June 2026)</b>", font=bold_dark_title_font),
+            tickmode="linear",
+            tick0=1,
+            dtick=2, # Show tick marks every 2 days to maintain breathing room
             showgrid=True,
             gridcolor='#e5e5e5',
-            dtick="D2" # Show every second day to keep labels clean
+            tickfont=bold_dark_font
         ),
         yaxis=dict(
-            title="Number of Calls",
+            title=dict(text="<b>Number of Calls</b>", font=bold_dark_title_font),
             showgrid=True,
             gridcolor='#e5e5e5',
-            range=[530, 665]
+            range=[530, 665],
+            tickfont=bold_dark_font
         ),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-        margin=dict(l=50, r=20, t=10, b=50),
+        legend=dict(
+            orientation="h", 
+            yanchor="bottom", 
+            y=1.02, 
+            xanchor="left", 
+            x=0,
+            font=bold_dark_font
+        ),
+        margin=dict(l=60, r=20, t=10, b=60),
         height=400,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
@@ -122,20 +138,23 @@ with chart_col2:
         y=df_dept['Calls Processed'],
         marker_color=['#0066cc', '#107c41', '#8a4bcf'],
         text=df_dept['Calls Processed'],
-        textposition='auto'
+        textposition='auto',
+        textfont=dict(family="Arial, sans-serif", size=12, color="#ffffff") # High contrast white on bars
     ))
     
     fig_bar.update_layout(
         xaxis=dict(
-            title="Department",
-            showgrid=False
+            title=dict(text="<b>Department</b>", font=bold_dark_title_font),
+            showgrid=False,
+            tickfont=bold_dark_font
         ),
         yaxis=dict(
-            title="Calls Volume",
+            title=dict(text="<b>Calls Volume</b>", font=bold_dark_title_font),
             showgrid=True,
-            gridcolor='#e5e5e5'
+            gridcolor='#e5e5e5',
+            tickfont=bold_dark_font
         ),
-        margin=dict(l=40, r=20, t=42, b=50),
+        margin=dict(l=50, r=20, t=42, b=60),
         height=400,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
