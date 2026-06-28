@@ -35,7 +35,7 @@ df_ts['DayNumber'] = df_ts['Date'].dt.day
 # Metrics Calculations
 total_calls_day = df_dept.loc[df_dept['Metric'] == 'Calls', ['Dept A', 'Dept B', 'Dept C']].sum(axis=1).values[0]
 total_resolved_day = df_dept.loc[df_dept['Metric'] == 'Resolved', ['Dept A', 'Dept B', 'Dept C']].sum(axis=1).values[0]
-unresolved_issues = total_calls_day - total_resolved_day # 624 - 514 = 110
+unresolved_issues = total_calls_day - total_resolved_day 
 
 # Pie chart totals for underlying categories
 total_transactional = df_dept.loc[df_dept['Metric'] == 'Transactional', ['Dept A', 'Dept B', 'Dept C']].sum(axis=1).values[0]
@@ -51,7 +51,7 @@ bold_dark_title_font = dict(family="Arial, sans-serif", size=15, color="#111111"
 # 2. HEADER
 # -----------------------------------------------------------------------------
 st.title("Call Centre Performance Dashboard")
-st.caption("Operational tracking and issue category diagnostics | June 2026")
+st.caption("Operational layout tracking performance and issue categories | June 2026")
 st.write("---")
 
 # -----------------------------------------------------------------------------
@@ -92,11 +92,12 @@ with col4:
 st.write("---")
 
 # -----------------------------------------------------------------------------
-# 4. ROW 1: TIME SERIES (3/4) & DEPARTMENTAL BAR CHART (1/4)
+# 4. SINGLE ROW INTEGRATED LAYOUT: [2 Quarters | 1 Quarter | 1 Quarter]
 # -----------------------------------------------------------------------------
-row1_col1, row1_col2 = st.columns([3, 1])
+layout_col1, layout_col2, layout_col3 = st.columns([2, 1, 1])
 
-with row1_col1:
+# --- QUARTERS 1 & 2: Time Series Chart ---
+with layout_col1:
     st.subheader("Daily Incoming Call Trends")
     
     fig_ts = go.Figure()
@@ -127,7 +128,35 @@ with row1_col1:
     )
     st.plotly_chart(fig_ts, use_container_width=True)
 
-with row1_col2:
+# --- QUARTER 3: Category Breakdown Pie Chart ---
+with layout_col2:
+    st.subheader("Monthly Category Totals")
+    
+    pie_labels = ["Transactional", "Returns", "Error"]
+    pie_values = [total_transactional, total_returns, total_errors]
+    pie_colors = ['#0066cc', '#107c41', '#8a4bcf']
+    
+    fig_pie = go.Figure(data=[go.Pie(
+        labels=pie_labels, 
+        values=pie_values, 
+        hole=.5,
+        marker=dict(colors=pie_colors),
+        textinfo='value+percent',
+        textfont=dict(family="Arial, sans-serif", size=11),
+        direction='clockwise',
+        sort=False
+    )])
+    
+    fig_pie.update_layout(
+        legend=dict(orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5, font=bold_dark_font),
+        margin=dict(l=10, r=10, t=40, b=40),
+        height=350,
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
+    st.plotly_chart(fig_pie, use_container_width=True)
+
+# --- QUARTER 4: Departmental Bar Chart ---
+with layout_col3:
     st.subheader("Calls Processed by Dept")
     
     fig_bar = go.Figure()
@@ -142,42 +171,7 @@ with row1_col2:
     fig_bar.update_layout(
         xaxis=dict(title=dict(text="<b>Department</b>", font=bold_dark_title_font), showgrid=False, tickfont=bold_dark_font),
         yaxis=dict(title=dict(text="<b>Calls Volume</b>", font=bold_dark_title_font), showgrid=True, gridcolor='#e5e5e5', tickfont=bold_dark_font),
-        margin=dict(l=50, r=20, t=20, b=50), height=380,
+        margin=dict(l=50, r=20, t=40, b=50), height=350,
         plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
     )
     st.plotly_chart(fig_bar, use_container_width=True)
-
-# -----------------------------------------------------------------------------
-# 5. ROW 2: BLANK SPACE (3/4) & UNDERLYING CATEGORIES PIE CHART (1/4)
-# -----------------------------------------------------------------------------
-row2_col1, row2_col2 = st.columns([3, 1])
-
-with row2_col1:
-    # Keeps alignment intact so the pie chart stays perfectly in the 4th quadrant
-    st.write("") 
-
-with row2_col2:
-    st.subheader("Monthly Category Totals")
-    
-    pie_labels = ["Transactional", "Returns", "Error"]
-    pie_values = [total_transactional, total_returns, total_errors]
-    pie_colors = ['#0066cc', '#107c41', '#8a4bcf'] # Palette matching elements
-    
-    fig_pie = go.Figure(data=[go.Pie(
-        labels=pie_labels, 
-        values=pie_values, 
-        hole=.5,
-        marker=dict(colors=pie_colors),
-        textinfo='value+percent',
-        textfont=dict(family="Arial, sans-serif", size=12),
-        direction='clockwise',
-        sort=False
-    )])
-    
-    fig_pie.update_layout(
-        legend=dict(orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5, font=bold_dark_font),
-        margin=dict(l=20, r=20, t=10, b=40),
-        height=320,
-        paper_bgcolor='rgba(0,0,0,0)'
-    )
-    st.plotly_chart(fig_pie, use_container_width=True)
